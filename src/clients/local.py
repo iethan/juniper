@@ -3,6 +3,8 @@ import os
 from ..abs.client_abc import ClientABC
 from ..utils.adapters import ShuttleAdapter
 
+__all__ = ["LocalFileSystem"]
+
 class LocalFileSystem(ClientABC):
 
     def __init__(self,file_path):

@@ -1,6 +1,11 @@
 import os
 import shutil
 
+__all__ = [
+    "Shuttle",
+    "Juniper"
+]
+
 class Cache: pass    
 
 class Shuttle:

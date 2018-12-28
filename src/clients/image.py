@@ -3,6 +3,8 @@ from ..utils.adapters import ShuttleAdapter
 
 from PIL import Image
 
+__all__ = ["ImageClient"]
+
 class ImageClient(ClientABC):
     def __init__(self,file_path,crop_box=None):
         self._file_path = file_path

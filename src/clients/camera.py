@@ -20,10 +20,9 @@ except ModuleNotFoundError:
         def close(self,): pass
 
 import time
-
 import os
 
-
+__all__ = ["CameraClient"]
 
 class CameraClient(ClientABC):
     def __init__(self,file_path):

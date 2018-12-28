@@ -1,6 +1,8 @@
 from ..abs.client_abc import ClientABC
 from ..utils.adapters import ShuttleAdapter
 
+__all__ = ["Text"]
+
 class Text(ClientABC):
     def __init__(self,data):
         self.data = data

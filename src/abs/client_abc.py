@@ -2,17 +2,18 @@
 from abc import ABCMeta
 from abc import abstractmethod
 
+__all__ = ["ClientABC"]
 
 class ClientABC(metaclass=ABCMeta):
     
     @abstractmethod
     def read(self):
-        """Read from Google Cloud Platform services"""
+        """Read from source"""
 
     @abstractmethod
     def write(self):
-        """Write to Google Cloud Platform services"""
+        """Read to source"""
 
     @abstractmethod
     def delete(self):
-        """Write to Google Cloud Platform services"""
+        """Delete from source"""

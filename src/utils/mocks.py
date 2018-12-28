@@ -1,5 +1,7 @@
 from time import sleep
 
+__all__ = ["MockIters"]
+
 class MockIter:
     def __init__(self,stop_iter_num=None,sleep=10):
         self._stop_iter_num = stop_iter_num

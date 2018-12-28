@@ -6,6 +6,8 @@ from google.cloud import storage
 import json
 import os
 
+__all__ = ["StorageClient"]
+
 class Bucket:
     def __init__(self,service_account=None,bucket_name=None,service=None):
         self._bucket_name = bucket_name

@@ -1,6 +1,8 @@
 
 from ..abs.io_abc import IoABC
 
+__all__ = ["Delete"]
+
 class Delete(IoABC):
     def __init__(self,client,**kwargs):
         self.client = client(**kwargs)
