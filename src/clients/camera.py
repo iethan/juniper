@@ -1,5 +1,6 @@
 from ..abs.client_abc import ClientABC
-from ..utils.adapters import ShuttleAdapter
+
+from ..utils.adapters import append_client_to_name
 
 from PIL import Image
 
@@ -25,33 +26,39 @@ import os
 __all__ = ["CameraClient"]
 
 class CameraClient(ClientABC):
-    def __init__(self,file_path):
-        self._file_path = file_path
+    def __init__(self,sleep):
+        self._sleep = sleep
 
     @property
-    def file_path(self,):
-        return self._file_path
+    def sleep(self,):
+        return self._sleep
 
     def read(self,shuttle):
-        raise NotImplementedError('Cannot read an image with a camera. \
-                                  Use write(shuttle) instead')
-
-    def write(self,shuttle):
 
         shuttle.client = self
-        shuttle.write_path = self.file_path        
+        shuttle.name = append_client_to_name(shuttle=shuttle)
+
+        tmp_file = '{}/{}.jpg'.format(shuttle.staging_path,shuttle.name.lower())
 
         camera = PiCamera()
         camera.start_preview()
-        time.sleep(2) #allows picamera start
-        camera.capture(self.file_path)
+        time.sleep(self.sleep) #allows picamera start
+        camera.capture(tmp_file)
         camera.close()
-        
-        shuttle.data = Image.open(self.file_path)
 
-        return ShuttleAdapter(shuttle=shuttle).shuttle
+        shuttle.data = Image.open(tmp_file)
+
+        os.remove(tmp_file)
+
+        return shuttle
+
+    
+    def write(self,shuttle):
+        raise NotImplementedError('Cannot write an image with a camera. \
+                                    Use read instead')
 
     def delete(self,shuttle):
+        raise NotImplementedError('Use the storage client to delete')
 
-        raise NotImplementedError('Use the Filesystem delete')
-                     
+    def edit(self,shuttle):
+        raise NotImplementedError('Use the image client to edit')                     

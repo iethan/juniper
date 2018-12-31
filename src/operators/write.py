@@ -5,7 +5,8 @@ __all__ = ["Write"]
 
 class Write(IoABC):
     def __init__(self,client,**kwargs):
-        self.client = client(**kwargs)
+        self.kwargs = kwargs
+        self.client = client
         self.objs = [self]
 
     def __add__(self,obj):
@@ -13,4 +14,4 @@ class Write(IoABC):
         return self
     
     def execute(self,shuttle):
-        return self.client.write(shuttle)
+        return self.client.write(shuttle,**self.kwargs)

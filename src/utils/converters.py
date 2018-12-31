@@ -1,8 +1,8 @@
 import json
 
 def convert_to_string(data):
-    if isinstance(data,dict):
+    try:
         return json.dumps(data)
-    if isinstance(data,(float,str)):
+    except:
         return str(data)
     

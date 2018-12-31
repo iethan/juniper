@@ -1,9 +1,9 @@
 
 from ..abs.io_abc import IoABC
 
-__all__ = ["Read"]
+__all__ = ["Merge"]
 
-class Read(IoABC):
+class Merge(IoABC):
     def __init__(self,client,**kwargs):
         self.kwargs = kwargs
         self.client = client
@@ -11,7 +11,7 @@ class Read(IoABC):
 
     def __add__(self,obj):
         self.objs.append(obj)
-        return self    
-
+        return self
+    
     def execute(self,shuttle):
-        return self.client.read(shuttle,**self.kwargs)
+        return self.client.merge(shuttle,**self.kwargs)

@@ -1,44 +1,36 @@
 from ..abs.client_abc import ClientABC
-from ..utils.adapters import ShuttleAdapter
+from ..utils.adapters import read_from_file
+from ..utils.adapters import append_client_to_name
+from ..utils.adapters import save_to_file
 
 from PIL import Image
 
 __all__ = ["ImageClient"]
 
 class ImageClient(ClientABC):
-    def __init__(self,file_path,crop_box=None):
-        self._file_path = file_path
-        self._crop_box = crop_box
-
-    @property
-    def crop_box(self,):
-        return self._crop_box
-
-    @property
-    def file_path(self,):
-        return self._file_path
 
     def read(self,shuttle):
-        shuttle.client = self
-        shuttle.write_path = self.file_path
-        return ShuttleAdapter(shuttle=shuttle).read()
+        raise NotImplementedError('Use storage client to read image')
 
     def write(self,shuttle):
-        shuttle.client = self
-        shuttle.write_path = self.file_path
-        return ShuttleAdapter(shuttle=shuttle).write()
+        raise NotImplementedError('Use storage client to write image')
 
-    def edit(self,shuttle):
+    def edit(self,shuttle,crop_box):
         
-        shuttle.client = self
-        shuttle.write_path = self.file_path
-        
-        img = Image.open(self.file_path)
-        
-        shuttle.data = img.crop(self.crop_box) 
+        try:
+            shuttle.client = self
+            shuttle.name = append_client_to_name(shuttle=shuttle)
 
-        return ShuttleAdapter(shuttle=shuttle).shuttle
+            image = shuttle.data
+            shuttle.data = image.crop(crop_box)
+            
+            return shuttle
 
+        except:
+            raise 'Incorrect image data type: {}'.format(type(shuttle.data))
+
+    def merge(self,shuttle):
+        raise NotImplementedError('Use storage client to merge images')
 
     def delete(self,shuttle):
         pass       

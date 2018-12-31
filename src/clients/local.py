@@ -1,32 +1,44 @@
 import os
 
 from ..abs.client_abc import ClientABC
-from ..utils.adapters import ShuttleAdapter
+
+from ..utils.adapters import convert_to_string
+from ..utils.adapters import read_from_file
+from ..utils.adapters import save_to_file
+
+from ..utils.adapters import append_client_to_name
 
 __all__ = ["LocalFileSystem"]
 
-class LocalFileSystem(ClientABC):
+class LocalFileSystem(ClientABC,Exception):
 
     def __init__(self,file_path):
         self.file_path = file_path
 
     def read(self,shuttle):     
-        
-        #used for naming in ShuttleAdapter
+
         shuttle.client = self
 
-        shuttle.write_path = self.file_path
+        shuttle.data = read_from_file(self.file_path)
+        shuttle.name = append_client_to_name(shuttle=shuttle)
 
-        return ShuttleAdapter(shuttle=shuttle).read()
+        return shuttle
 
     def write(self, shuttle):
 
-        #used for naming in ShuttleAdapter
         shuttle.client = self
+        
+        save_to_file(data=shuttle.data,file_path=self.file_path)
+        
+        shuttle.name = append_client_to_name(shuttle=shuttle)
+        
+        return shuttle
 
-        shuttle.write_path = self.file_path 
+    def edit(self,shuttle):
+        raise NotImplementedError('Use image or text clients for editing')
 
-        return ShuttleAdapter(shuttle=shuttle).write()
+    def merge(self,shuttle):
+        raise NotImplementedError('#TODO')
 
     def delete(self,shuttle):
 
@@ -34,8 +46,6 @@ class LocalFileSystem(ClientABC):
 
         shuttle.client = self
 
-        shuttle = ShuttleAdapter(shuttle=shuttle)
-
-        shuttle.write_path = self.file_path
+        shuttle.name = append_client_to_name(shuttle=shuttle)
 
         return shuttle

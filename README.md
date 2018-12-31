@@ -19,8 +19,15 @@ source env/bin/activate
 pip3 install git+https://github.com/iethan/juniper.git
 ```
 
+### Enable Vision API
+
+```
+gcloud services enable vision.googleapis.com
+```
+
 ## What it can do
 - Light transformations
+
 ### Functionality
 - Storage: Google Cloud Storage, LocalFileSystem, 
     Text(in memory)
@@ -33,45 +40,36 @@ pip3 install git+https://github.com/iethan/juniper.git
 - It's limited to the scope of your computer memory
 - It's not distributed
 
+## Operator and client lookup
+
+|                    | Instantiation Parameters     | Return Values                 | Read           | Write         | Edit          | Delete        | Merge                 |
+|--------------------|------------------------------|-------------------------------|----------------|---------------|---------------|---------------|-----------------------|
+| LocalFileSystem    |           file_path          | str, dict, list, tuple, image |  ✔ - file_path | ✔ - file_path |       x       | ✔ - file_path |     ✔ - file_paths    |
+| Text               |             data             | str, dict, list, tuple, image |     ✔ - n/a    |       x       | ✔ - exec_func |       x       |     ✔ - exec_func     |
+| Image              |              n/a             |             Image             |        x       |       x       |  ✔ - crop_box |       x       |           x           |
+| Camera             |             sleep            |             Image             |     ✔ - n/a    |       x       |       x       |       x       |           x           |
+| GoogleCloudStorage | service_account, bucket_name | str, dict, list, tuple, image |  ✔ - blob_name | ✔ - blob_name |       x       | ✔ - blob_name | ✔ - prefix, blob_name |
+| BigQuery           |             #TODO            |               --              |       --       |       --      |       --      |       --      |           --          |
+| APIs               |        service_account       |              dict             | ✔ - api_params |       x       |       x       |       x       |           x           |
+
 ## Example Recipes
 
 ```
-Juniper() >> (
-            # take a picture with PiCamera*
-            Write(CameraClient,file_path='old_image.jpg')  
-            
-            # write the file to Cloud Storage
-            + Write(StorageClient,bucket_name='hi-12394',
-                            service_account=SERVICE_ACCOUNT,
-                            blob_name='old_image.jpg',
-                            file_path='old_image.jpg',
-            )
+    #instantiate storage client for use in pipeline
+    storage_client = StorageClient(service_account=SERVICE_ACCOUNT, 
+                                    bucket_name='mweroisdf')
 
-            # read the saved local file into memory
-            + Read(LocalFileSystem,file_path='old_image.jpg')
 
-            # crop the image
-            + Edit(ImageClient,file_path='old_image.jpg',
-                                crop_box=(1,1,200,200))
-
-            # write the new image to the local file system**
-            + Write(LocalFileSystem,file_path='new_image-2.jpg')
-
-            # upload the new image to Google Cloud Storage      
-            + Write(StorageClient,bucket_name='hi-12394',
-                            service_account=SERVICE_ACCOUNT,
-                            blob_name='new_image-2.jpg',
-                            file_path='new_image-2.jpg',
-            )
+    Juniper(staging_path='staging') >> ( #you can change the staging path
+                Read(LocalFileSystem(file_path='download.jpg'))
+                + Read( #apply an operator to client
+                    GoogleVisionClient( 
+                        service_account=SERVICE_ACCOUNT),
+                        report_type='object_localization'
+                )
+                + Write(storage_client,blob_name='results.json')
 )
 ```
-*If PiCamera is not installed locally, a mock is instatiated. This 
-can help with testing on systems without PiCamera installed.
-
-**The Edit operatator does not automatically save the file locally,
-instead, it saves it into memory and can be used to save. This enables
-multiple edits on the same image. To upload the edited image, you must
-first save it.
 
 # TODO
 - Merge operator

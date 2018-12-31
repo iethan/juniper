@@ -1,8 +1,13 @@
 from ..abs.client_abc import ClientABC
 from ..utils.adapters import ShuttleAdapter
-from ..utils.adapters import convert_to_string
+
 from google.cloud import storage
 
+from ..utils.adapters import append_client_to_name
+from ..utils.adapters import save_to_file
+from ..utils.adapters import convert_to_string
+from ..utils.adapters import read_from_file
+import uuid 
 import json
 import os
 
@@ -125,26 +130,15 @@ class File:
 
 class StorageClient(ClientABC):
 
-    def __init__(self,bucket_name,service_account,blob_name=None,file_path=None,content_type='txt'): 
-        self._file_path = file_path
+    def __init__(self,bucket_name,service_account): 
         self._bucket_name = bucket_name
-        self._content_type = content_type
-        self._blob_name = blob_name
         self._service_account = service_account
         self._service = storage.Client()\
                 .from_service_account_json(self.service_account)        
 
     @property
-    def file_path(self,):
-        return self._file_path
-
-    @property
     def blob_name(self,):
         return self._blob_name
-
-    @property
-    def content_type(self,):
-        return self._content_type
 
     @property
     def service_account(self,):
@@ -163,66 +157,75 @@ class StorageClient(ClientABC):
         return Bucket(bucket_name=self.bucket_name, 
                 service_account=self.service_account)
 
-    @bucket.setter
-    def bucket(self,bucket_name):
-        return Bucket(bucket_name=bucket_name, 
-                service_account=self.service_account)
 
     @property
     def bucket_instance(self,):
         return self.bucket.bucket_instance
 
-    def read(self,shuttle):
+    def read(self,shuttle,blob_name,content_type='txt'):
 
         shuttle.client = self
+        shuttle.name = append_client_to_name(shuttle=shuttle)
 
-        shuttle = ShuttleAdapter(shuttle=shuttle).shuttle
+        tmp_file = '{}/{}-{}'.format(shuttle.staging_path, uuid.uuid4().hex,blob_name)
 
         f = File(bucket=self.bucket_instance,
-                 blob_name=self.blob_name)
+                 blob_name=blob_name)
 
-        shuttle.data = f.read(file_path=self.file_path)
-        shuttle.write_path = f.blob_path
+        f.read(file_path=tmp_file) #saves file to staging
+        shuttle.data = read_from_file(tmp_file) #stores on shuttle
+
+        os.remove(tmp_file) #removes from staging
         
         return shuttle
 
-    def write(self, shuttle):
+    def write(self, shuttle, blob_name, content_type='txt'):
 
         shuttle.client = self
+        shuttle.name = append_client_to_name(shuttle=shuttle)
         
-        shuttle = ShuttleAdapter(shuttle=shuttle).shuttle
+        tmp_file = '{}/{}-{}'.format(shuttle.staging_path,uuid.uuid4().hex,blob_name)
+        
+        save_to_file(data=shuttle.data,file_path=tmp_file)
 
         f = File(bucket=self.bucket_instance,
-                                    blob_name=self.blob_name)
-        f.write(data=shuttle.data, content_type=self.content_type,
-                                        file_path=self.file_path)
+                                    blob_name=blob_name)
+
+        f.write(content_type=content_type,
+                    file_path=tmp_file)
         
-        shuttle.write_path = f.blob_path
+        os.remove(tmp_file)
 
         return shuttle
 
-    def delete(self,shuttle):
-        # blob_name=None,bucket=None
-        shuttle.client = self
-        
-        shuttle = ShuttleAdapter(shuttle=shuttle).shuttle
+    def delete(self,shuttle,blob_name=None,bucket=False):
 
-        if self.blob_name:
-            f = File(bucket=self.bucket_instance,blob_name=self.blob_name)            
+        shuttle.client = self
+        shuttle.name = append_client_to_name(shuttle=shuttle)
+
+        if blob_name:
+            f = File(bucket=self.bucket_instance,blob_name=blob_name)            
             f.delete()
-            shuttle.write_path = f.blob_path
-        else:
+        elif bucket:
             self.bucket.delete()
         
         return shuttle
-        
 
+    def merge(self,shuttle, blob_name ,prefix=None):
 
-    def merge(self,new_file_name,prefix=None):
+        shuttle.client = self
+        shuttle.name = append_client_to_name(shuttle=shuttle)
+
+        tmp_file = '{}/{}-{}'.format(shuttle.staging_path,uuid.uuid4().hex,blob_name)
 
         blobs = self.bucket_instance.list_blobs(prefix=prefix)
-        self.bucket_instance.blob(new_file_name).compose(blobs)
+        self.bucket_instance.blob(blob_name).compose(blobs)
 
-        f = File(bucket=self.bucket_instance,blob_name=new_file_name)
+        f = File(bucket=self.bucket_instance,blob_name=blob_name)
 
-        return f.get_blob()
+        f.read(file_path=tmp_file) #saves file to staging
+        shuttle.data = read_from_file(tmp_file) #stores on shuttle
+
+        os.remove(tmp_file) #removes from staging        
+
+        return shuttle
