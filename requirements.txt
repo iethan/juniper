@@ -1,5 +1,0 @@
-pytest
-google-cloud-storage
-google-cloud-vision==0.35.0
-pillow
-jsonlines
