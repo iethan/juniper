@@ -26,12 +26,12 @@ setup(
     description='ETL manager', 
     author='Ethan Lyon', 
     author_email='ethanlyon@gmail.com',
-    package_dir={'juniper':'src'},
-    packages= setuptools.find_packages(include=include_folders)
-    # packages=['juniper.',
-    #         #   'juniper.abs','juniper.clients.storage',
-    #         #   'juniper.clients.storage',
-    #         #   'juniper.operators','juniper.utils'
+    package_dir={'':'src'},
+    # packages= setuptools.find_packages(exclude=['tests','_src'])
+    # packages=[
+    #           'juniper.abs','juniper.clients.storage',
+    #           'juniper.clients.storage',
+    #           'juniper.operators','juniper.utils'
     # ],
     
     ) 
