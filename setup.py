@@ -28,8 +28,14 @@ setup(
               'juniper.abs','juniper.clients.storage',
               'juniper.clients.storage.google',
               'juniper.clients.apis',
-              'juniper.operators','juniper.utils'
+              'juniper.operators','juniper.utils',
     ],
+    install_requires=[
+        'google-api-python-client>=1.6.5',
+        'pillow>=5.3.0',
+        'requests>=2.21.0',
+        'google-cloud-vision>=0.35.0'
+    ]
     
     ) 
 __author__ = 'Ethan Lyon' 
