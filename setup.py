@@ -16,9 +16,6 @@ Juniper() >> (
 """
 
 from setuptools import setup
-import setuptools
-
-include_folders = setuptools.find_packages(include=['*.src','src.*','src','*.src.*'])
 
 setup(
     name='juniper', 
@@ -26,13 +23,13 @@ setup(
     description='ETL manager', 
     author='Ethan Lyon', 
     author_email='ethanlyon@gmail.com',
-    package_dir={'':'src'},
-    # packages= setuptools.find_packages(exclude=['tests','_src'])
-    # packages=[
-    #           'juniper.abs','juniper.clients.storage',
-    #           'juniper.clients.storage',
-    #           'juniper.operators','juniper.utils'
-    # ],
+    package_dir={'juniper':'src'},
+    packages=[
+              'juniper.abs','juniper.clients.storage',
+              'juniper.clients.storage.google',
+              'juniper.clients.apis',
+              'juniper.operators','juniper.utils'
+    ],
     
     ) 
 __author__ = 'Ethan Lyon' 
