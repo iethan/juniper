@@ -18,6 +18,8 @@ Juniper() >> (
 from setuptools import setup
 import setuptools
 
+exclude_folders = setuptools.find_packages(exclude=['*.tests','tests.*','tests','*.tests.*',
+'*._src','_src.*','_src','*._src.*'])
 
 
 setup(
@@ -26,8 +28,8 @@ setup(
     description='ETL manager', 
     author='Ethan Lyon', 
     author_email='ethanlyon@gmail.com',
-    package_dir={'juniper':'src'},
-    packages= setuptools.find_packages(include=['src.*','juniper'])
+    package_dir={'':'src'},
+    packages= setuptools.find_packages("src",exclude=exclude_folders)
     # packages=['juniper.',
     #         #   'juniper.abs','juniper.clients.storage',
     #         #   'juniper.clients.storage',
