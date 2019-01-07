@@ -25,8 +25,8 @@ setup(
     author='Ethan Lyon', 
     author_email='ethanlyon@gmail.com',
     package_dir={'juniper':'src'},
-    packages=['juniper','juniper.abs.*','juniper.clients.*',
-              'juniper.operators.*','juniper.utils.*'
+    packages=['juniper','juniper.abs','juniper.clients.*',
+              'juniper.operators','juniper.utils'
     ],
     
     ) 
