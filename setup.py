@@ -15,8 +15,10 @@ Juniper() >> (
 
 """
 
-from setuptools import setup 
+from setuptools import setup
 import setuptools
+
+
 
 setup(
     name='juniper', 
@@ -25,9 +27,12 @@ setup(
     author='Ethan Lyon', 
     author_email='ethanlyon@gmail.com',
     package_dir={'juniper':'src'},
-    packages=['juniper','juniper.abs','juniper.clients.*',
-              'juniper.operators','juniper.utils'
-    ],
+    packages= setuptools.find_packages(include=['src.*','juniper'])
+    # packages=['juniper.',
+    #         #   'juniper.abs','juniper.clients.storage',
+    #         #   'juniper.clients.storage',
+    #         #   'juniper.operators','juniper.utils'
+    # ],
     
     ) 
 __author__ = 'Ethan Lyon' 

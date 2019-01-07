@@ -1,5 +1,5 @@
-include tests/storage_tests/test_data/test-file*.txt
 include README.md
 global-exclude .git*
 global-exclude *.pyc
 include *pytest.ini
+include src/juniper.py
