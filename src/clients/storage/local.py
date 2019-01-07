@@ -1,12 +1,12 @@
 import os
 
-from ..abs.client_abc import ClientABC
+from ...abs.client_abc import ClientABC
 
-from ..utils.adapters import convert_to_string
-from ..utils.adapters import read_from_file
-from ..utils.adapters import save_to_file
+from ...utils.adapters import convert_to_string
+from ...utils.adapters import read_from_file
+from ...utils.adapters import save_to_file
 
-from ..utils.adapters import append_client_to_name
+from ...utils.adapters import append_client_to_name
 
 __all__ = ["LocalFileSystem"]
 

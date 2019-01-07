@@ -72,4 +72,4 @@ class Juniper:
 
             print(shuttle.name)
 
-        os.rmdir(self.staging_path)
+        shutil.rmtree(self.staging_path)

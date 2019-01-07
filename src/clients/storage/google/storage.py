@@ -1,17 +1,20 @@
-from ..abs.client_abc import ClientABC
-from ..utils.adapters import ShuttleAdapter
+from ....abs.client_abc import ClientABC
+from ....utils.adapters import ShuttleAdapter
 
 from google.cloud import storage
 
-from ..utils.adapters import append_client_to_name
-from ..utils.adapters import save_to_file
-from ..utils.adapters import convert_to_string
-from ..utils.adapters import read_from_file
+from ....utils.adapters import append_client_to_name
+from ....utils.adapters import save_to_file
+from ....utils.adapters import convert_to_string
+from ....utils.adapters import read_from_file
+
 import uuid 
 import json
 import os
 
-__all__ = ["StorageClient"]
+__all__ = ["CloudStorageClient"]
+
+
 
 class Bucket:
     def __init__(self,service_account=None,bucket_name=None,service=None):
@@ -128,7 +131,7 @@ class File:
     def delete(self,):  
         return self.bucket.delete_blob(self.blob_name)
 
-class StorageClient(ClientABC):
+class CloudStorageClient(ClientABC):
 
     def __init__(self,bucket_name,service_account): 
         self._bucket_name = bucket_name

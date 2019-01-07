@@ -34,10 +34,11 @@ source env/bin/activate
 pip3 install git+https://github.com/iethan/juniper.git
 ```
 
-### Enable Vision API
+### Enable Google APIs
 
 ```
 gcloud services enable vision.googleapis.com
+gcloud services enable drive.googleapis.com
 ```
 
 ## Operator and client lookup

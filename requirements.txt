@@ -2,4 +2,6 @@ pytest
 google-cloud-storage
 google-cloud-vision==0.35.0
 pillow
-jsonlines
+google-api-python-client==1.6.5
+oauth2client==4.1.2
+google-auth-httplib2
