@@ -9,9 +9,10 @@ reduce small but long, verbose ETL jobs.
 
 ### Functionality
 - Storage: Google Cloud Storage, LocalFileSystem, 
-    Text(in memory)
+    Text(in memory), Google Drive
 - Camera: PiCamera
-- Operators: Read, Write, Delete, Edit
+- APIs: Google Vision, SEMRush
+- Operators: Read, Write, Delete, Edit, Merge
 - Utils: MockIter
 
 ## What it cannot do
@@ -43,15 +44,17 @@ gcloud services enable drive.googleapis.com
 
 ## Operator and client lookup
 
-|                    | Instantiation Parameters     | Return Values                 | Read           | Write         | Edit          | Delete        | Merge                 |
-|--------------------|------------------------------|-------------------------------|----------------|---------------|---------------|---------------|-----------------------|
-| LocalFileSystem    |           file_path          | str, dict, list, tuple, image |  ✔ - file_path | ✔ - file_path |       x       | ✔ - file_path |     ✔ - file_paths    |
-| Text               |             data             | str, dict, list, tuple, image |     ✔ - n/a    |       x       | ✔ - exec_func |       x       |     ✔ - exec_func     |
-| Image              |              n/a             |             Image             |        x       |       x       |  ✔ - crop_box |       x       |           x           |
-| Camera             |             sleep            |             Image             |     ✔ - n/a    |       x       |       x       |       x       |           x           |
-| GoogleCloudStorage | service_account, bucket_name | str, dict, list, tuple, image |  ✔ - blob_name | ✔ - blob_name |       x       | ✔ - blob_name | ✔ - prefix, blob_name |
-| BigQuery           |             #TODO            |               --              |       --       |       --      |       --      |       --      |           --          |
-| APIs               |        service_account       |              dict             | ✔ - api_params |       x       |       x       |       x       |           x           |
+| Instantiation Parameters | Return Values                | Read                          | Write                                                                                           | Edit          | Delete        | Merge         |                       |
+|--------------------------|------------------------------|-------------------------------|-------------------------------------------------------------------------------------------------|---------------|---------------|---------------|-----------------------|
+| LocalFileSystem          | file_path                    | str, dict, list, tuple, image | ✔ - file_path                                                                                   | ✔ - file_path | x             | ✔ - file_path | ✔ - file_paths        |
+| Text                     | data                         | str, dict, list, tuple, image | ✔ - n/a                                                                                         | x             | ✔ - exec_func | x             | ✔ - exec_func         |
+| Image                    | n/a                          | Image                         | x                                                                                               | x             | ✔ - crop_box  | x             | x                     |
+| Camera                   | sleep                        | Image                         | ✔ - n/a                                                                                         | x             | x             | x             | x                     |
+| GoogleCloudStorage       | service_account, bucket_name | str, dict, list, tuple, image | ✔ - blob_name                                                                                   | ✔ - blob_name | x             | ✔ - blob_name | ✔ - prefix, blob_name |
+| BigQuery                 | #TODO                        | –                             | –                                                                                               | –             | –             | –             | –                     |
+| APIs                     | service_account              | dict                          | ✔ - api_params                                                                                  | x             | x             | x             | x                     |
+| - Vision                 | --                           | --                            | ✔ - report_type                                                                                 | --            | --            | --            | --                    |
+| - SEMRush                | api_key, display_limit       | --                            | ✔ - url (link to web-url)-- or -- domain, database, type, device, display_filter, display_limit | --            | --            | --            | --                    |
 
 ## Example Recipes
 
@@ -73,7 +76,6 @@ gcloud services enable drive.googleapis.com
 ```
 
 # TODO
-- Merge operator
 - Logging
 - Factory operators and clients for bulk processing
 - Caching
