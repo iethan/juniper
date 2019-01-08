@@ -2,5 +2,4 @@ include README.md
 global-exclude .git*
 global-exclude *.pyc
 include *pytest.ini
-include src/juniper.py
-global-include src/clients/*
+include juniper/juniper.py

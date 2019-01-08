@@ -26,6 +26,7 @@ setup(
     package_dir={'juniper':'src'},
     packages=[
               'juniper.abs','juniper.clients.storage',
+              'juniper.clients','juniper',
               'juniper.clients.storage.google',
               'juniper.clients.apis',
               'juniper.operators','juniper.utils',
@@ -35,7 +36,8 @@ setup(
         'pillow>=5.3.0',
         'requests>=2.21.0',
         'google-cloud-vision>=0.35.0'
-    ]
+    ],
+    include_package_data=True
     
     ) 
 __author__ = 'Ethan Lyon' 
