@@ -11,14 +11,12 @@ from ..utils.adapters import append_client_to_name
 __all__ = ["Text"]
 
 class Text(ClientABC):
-    def __init__(self,data):
-        self.data = data
 
-    def read(self,shuttle):
+    def read(self,shuttle,data):
 
         shuttle.client = self
 
-        shuttle.data = self.data
+        shuttle.data = data
         shuttle.name = append_client_to_name(shuttle=shuttle)
 
         return shuttle

@@ -45,8 +45,6 @@ def save_to_file(data,file_path):
     except:
         return data
 
-
-
 class Open:
 
     @classmethod

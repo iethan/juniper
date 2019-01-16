@@ -45,18 +45,27 @@ REQUEST_FIELDS = tuple(REQUEST_DEFAULT_FIELDS.keys())
 
 REQUEST_FIELD_DEFAULTS = tuple(REQUEST_DEFAULT_FIELDS.values())
 
-SEMRushRequest = namedtuple('SEMRushRequest',REQUEST_FIELDS,
-                            defaults=REQUEST_FIELD_DEFAULTS)
+SEMRushRequest = namedtuple('SEMRushRequest',REQUEST_FIELDS)
+SEMRushRequest.__new__.__defaults__ = REQUEST_FIELD_DEFAULTS
 
 class SEMRushClient(ClientABC):
     
     BASE_URL = 'https://api.semrush.com/'
 
-    def __init__(self,api_key,display_limit):
+    def __init__(self,api_key,display_limit=10):
         self.api_key = api_key
-        self.display_limit = display_limit
+        self.display_limit = display_limit or 10
 
     def read(self, shuttle, **params):
+
+        shuttle.client = self
+        shuttle.name = append_client_to_name(shuttle)
+
+        if isinstance(shuttle.data,dict):
+            params = {
+                'url' : shuttle.data['meta']['report_url']
+                }
+            self.display_limit = shuttle.data['meta'].get('display_limit')                
 
         semrush_url = params.get('url')
 
@@ -64,7 +73,6 @@ class SEMRushClient(ClientABC):
             params = SEMRushURLAdapter(semrush_url=semrush_url, 
                         display_limit=self.display_limit).parse()
             params.update({'key' : self.api_key})
-        
 
         request_params = SEMRushRequest(**params)
 
@@ -76,7 +84,15 @@ class SEMRushClient(ClientABC):
             request_params._replace(display_filter=unquote(display_filter))
 
         req = requests.get(self.BASE_URL,request_params._asdict())        
-        shuttle.data = req.text
+
+        if isinstance(shuttle.data,dict):
+            shuttle.data.update(
+                {
+                    'response' : req.text
+                }
+            )
+        else:
+            shuttle.data = req.text
         
         return shuttle
 

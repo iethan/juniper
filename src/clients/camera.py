@@ -9,8 +9,8 @@ try:
     from picamera import PiCamera
 
 except ModuleNotFoundError:
-    import warnings
-    warnings.warn('PiCamera could not found, loading mock')
+    # import warnings
+    # warnings.warn('PiCamera could not found, loading mock')
     #mocking camera if not found
     
     class PiCamera:

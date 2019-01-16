@@ -14,8 +14,6 @@ import os
 
 __all__ = ["CloudStorageClient"]
 
-
-
 class Bucket:
     def __init__(self,service_account=None,bucket_name=None,service=None):
         self._bucket_name = bucket_name
@@ -182,13 +180,20 @@ class CloudStorageClient(ClientABC):
         
         return shuttle
 
-    def write(self, shuttle, blob_name, content_type='txt'):
+    def write(self, shuttle, blob_name=None, content_type='txt'):
 
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle)
+
+
+        #blob_name can ride on the shuttle
+        if not blob_name:
+            blob_name = shuttle.data['meta']['blob_name']
+            del shuttle.data['meta']['blob_name']
+            shuttle.data = shuttle.data['data']
         
         tmp_file = '{}/{}-{}'.format(shuttle.staging_path,uuid.uuid4().hex,blob_name)
-        
+
         save_to_file(data=shuttle.data,file_path=tmp_file)
 
         f = File(bucket=self.bucket_instance,

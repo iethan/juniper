@@ -387,10 +387,18 @@ class DriveClient(ClientABC):
         return shuttle
 
 
-    def write(self, shuttle, file_name, mime_type='txt', notify=False):
+    def write(self, shuttle, file_name=None, mime_type='txt', notify=False):
 
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle) 
+
+        original_data = shuttle.data
+        if isinstance(original_data,dict):
+            shuttle.data = shuttle.data['response']
+            self.folder_path = original_data['meta']['folder_path']
+            self.collaborator_emails = original_data['meta']['collaborator_emails']
+            self.get_or_create_folders()
+            file_name = original_data['meta']['drive_file_name']
 
         tmp_file = '{}/{}-{}'.format(shuttle.staging_path,uuid.uuid4().hex,file_name)
         save_to_file(data=shuttle.data,file_path=tmp_file)
@@ -404,6 +412,8 @@ class DriveClient(ClientABC):
                     parent_id=parent_id, mime_type=mime_type)
         
         f.write(file_path=tmp_file)
+
+        shuttle.data = original_data
 
         os.remove(tmp_file)
         
