@@ -5,15 +5,21 @@ from ..utils.adapters import append_client_to_name
 
 __all__ = ["Transform"]
 
-class Transform(ClientABC):
+class Transform(ClientABC,Exception):
     def __init__(self,exec_func):
         self.exec_func = exec_func
 
-    def edit(self, shuttle, **kwargs):
-
+    def edit(self, shuttle):
+        
         shuttle.client = self
+        
+        func_result = self.exec_func(shuttle.data,**shuttle.meta)
 
-        shuttle.data = self.exec_func(shuttle.data,**kwargs)
+        if func_result:
+            shuttle.data = func_result
+        else:
+            raise Exception('Cannot have a None result from function')
+
         shuttle.name = append_client_to_name(shuttle=shuttle)
 
         return shuttle

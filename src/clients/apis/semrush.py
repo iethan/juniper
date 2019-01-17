@@ -3,6 +3,7 @@ from ...abs.client_abc import ClientABC
 from ...utils.adapters import append_client_to_name
 from ...utils.adapters import save_to_file
 
+from ...utils.converters import byte_converters
 
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
@@ -12,6 +13,8 @@ from urllib.parse import unquote
 from collections import namedtuple
 import operator
 import json
+
+from pprint import pprint as p
 
 import requests
 
@@ -56,25 +59,23 @@ class SEMRushClient(ClientABC):
         self.api_key = api_key
         self.display_limit = display_limit or 10
 
-    def read(self, shuttle, **params):
+    def read(self, shuttle):
 
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle)
 
-        if isinstance(shuttle.data,dict):
-            params = {
-                'url' : shuttle.data['meta']['report_url']
-                }
-            self.display_limit = shuttle.data['meta'].get('display_limit')                
+        params = shuttle.meta
 
-        semrush_url = params.get('url')
+        self.display_limit = params.get('display_limit',10)                
+
+        semrush_url = params['report_url']
 
         if semrush_url:
-            params = SEMRushURLAdapter(semrush_url=semrush_url, 
+            request_params = SEMRushURLAdapter(semrush_url=semrush_url, 
                         display_limit=self.display_limit).parse()
-            params.update({'key' : self.api_key})
+            request_params.update({'key' : self.api_key})
 
-        request_params = SEMRushRequest(**params)
+        request_params = SEMRushRequest(**request_params)
 
         request_params = request_params._replace(export_columns=COLUMN_MAP[request_params.type])
         request_params = request_params._replace(key=self.api_key)
@@ -83,16 +84,14 @@ class SEMRushClient(ClientABC):
         if display_filter:
             request_params._replace(display_filter=unquote(display_filter))
 
-        req = requests.get(self.BASE_URL,request_params._asdict())        
+        req = requests.get(self.BASE_URL,request_params._asdict())  
 
-        if isinstance(shuttle.data,dict):
-            shuttle.data.update(
-                {
-                    'response' : req.text
-                }
-            )
-        else:
-            shuttle.data = req.text
+        param_dict = request_params._asdict()
+        param_dict.pop('key')
+        param_dict.update({'mime_type' : 'txt'}) #will always be text
+
+        shuttle.meta = param_dict
+        shuttle.data = req.text
         
         return shuttle
 

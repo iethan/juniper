@@ -15,8 +15,9 @@ from time import sleep
 
 from ....abs.client_abc import ClientABC
 from ....utils.adapters import append_client_to_name
-from ....utils.adapters import save_to_file
 from ....utils.adapters import read_from_file
+
+from ....utils.converters import to_byte_converters
 
 def build_service(SERVICE_ACCOUNT):
     SCOPES = ['https://www.googleapis.com/auth/drive'] 
@@ -152,11 +153,10 @@ class File:
                 'status' : 'deleted'            
         }
         
-    def write(self,file_path):        
+    def write(self,data):        
         
         drive_mime = File.MEME_TYPES[self.mime_type]['drive']
         file_mime = File.MEME_TYPES[self.mime_type]['mime']
-
 
         file_service = self.service.files()        
 
@@ -165,8 +165,8 @@ class File:
             'mimeType': drive_mime,            
         }                                  
 
-        media = http.MediaFileUpload(file_path, mimetype=file_mime,
-                    chunksize=1024*1024, resumable=True)        
+        media = http.MediaIoBaseUpload(data, mimetype=file_mime,
+                    chunksize=1024*1024, resumable=True)  
         
         #update
         if self.ids:
@@ -387,36 +387,35 @@ class DriveClient(ClientABC):
         return shuttle
 
 
-    def write(self, shuttle, file_name=None, mime_type='txt', notify=False):
+    def write(self, shuttle):
 
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle) 
+        
+        params = shuttle.meta
 
-        original_data = shuttle.data
-        if isinstance(original_data,dict):
-            shuttle.data = shuttle.data['response']
-            self.folder_path = original_data['meta']['folder_path']
-            self.collaborator_emails = original_data['meta']['collaborator_emails']
+        if not self.folder_path:
+            self.folder_path = params['folder_path']
+            self.collaborator_emails = params['collaborator_emails']
             self.get_or_create_folders()
-            file_name = original_data['meta']['drive_file_name']
 
-        tmp_file = '{}/{}-{}'.format(shuttle.staging_path,uuid.uuid4().hex,file_name)
-        save_to_file(data=shuttle.data,file_path=tmp_file)
+        file_name = params['file_name']
+        content_type = params['content_type']
 
         try:
             parent_id = self.folder_info[-1]
         except:
-            parent_id = None            
+            parent_id = None   
+
+        mime_type = params['mime_type']
 
         f = File(service=self.service, file_name=file_name, 
-                    parent_id=parent_id, mime_type=mime_type)
-        
-        f.write(file_path=tmp_file)
+                    parent_id=parent_id, mime_type=content_type)
 
-        shuttle.data = original_data
+        data_to_bytes = to_byte_converters[mime_type](shuttle.data)
 
-        os.remove(tmp_file)
-        
+        f.write(data=data_to_bytes)
+
         return shuttle
 
 

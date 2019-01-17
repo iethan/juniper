@@ -1,5 +1,8 @@
 import os
 import shutil
+import io
+
+import json
 
 from pprint import pprint as p
 
@@ -13,6 +16,8 @@ class Cache: pass
 class Shuttle:
     def __init__(self,name=None):
         self._name = name
+        self._data = {}
+        self._meta = {}
 
     @property
     def name(self):
@@ -31,30 +36,31 @@ class Shuttle:
     def client(self,value):
         self._client = value
         return value
-
-    @property
-    def staging_path(self):
-        return self._staging_path
-
-    @staging_path.setter
-    def staging_path(self,value):
-        self._staging_path = value
-        return value
-
+    
     @property
     def data(self):
-        return self._data
+        value = self._data or io.BytesIO(
+            json.dumps({}).encode('utf-8')
+            ) 
+        return value
 
     @data.setter
     def data(self,value):
         self._data = value
         return value
-       
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @meta.setter
+    def meta(self,value):
+        self._meta = value
+        return value       
         
 class Juniper:
 
-    def __init__(self,staging_path='staging',cache=None,logging=None):        
-        self.staging_path = staging_path
+    def __init__(self,cache=None,logging=None):        
         #todo implement 
         self.cache = cache
         self.logging = logging
@@ -63,15 +69,9 @@ class Juniper:
         
         shuttle = Shuttle()
 
-        if not os.path.exists(self.staging_path):
-            os.makedirs(self.staging_path)
-
         for step,obj in enumerate(io.objs):            
             step = '{0:03d}'.format(step)
             shuttle.name = '-'.join([step,obj.__class__.__name__])
-            shuttle.staging_path = self.staging_path
             shuttle = obj.execute(shuttle)
 
             print(shuttle.name)
-
-        shutil.rmtree(self.staging_path)

@@ -8,6 +8,8 @@ from ....utils.adapters import save_to_file
 from ....utils.adapters import convert_to_string
 from ....utils.adapters import read_from_file
 
+from ....utils.converters import byte_converters
+
 import uuid 
 import json
 import os
@@ -110,19 +112,11 @@ class File:
                 .download_as_string()
             return data.decode('utf-8')
 
-    def write(self, data=None, content_type='txt',file_path=None):
+    def write(self, data, content_type='txt'):
         
-        try:
-            data = convert_to_string(data)
-            self.bucket.blob(self.blob_name)\
-                .upload_from_string(data,File.MIME_TYPES[content_type])            
-        except:
-            pass
-        if file_path:
-            head,tail = os.path.splitext(file_path)
-            tail = tail.replace('.','')
-            self.bucket.blob(self.blob_name)\
-                .upload_from_filename(file_path,File.MIME_TYPES[tail])
+        data = convert_to_string(data)
+        self.bucket.blob(self.blob_name)\
+            .upload_from_string(data,File.MIME_TYPES[content_type])            
         
         return self.get_blob()
 
@@ -180,29 +174,19 @@ class CloudStorageClient(ClientABC):
         
         return shuttle
 
-    def write(self, shuttle, blob_name=None, content_type='txt'):
+    def write(self, shuttle):
 
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle)
 
-
-        #blob_name can ride on the shuttle
-        if not blob_name:
-            blob_name = shuttle.data['meta']['blob_name']
-            del shuttle.data['meta']['blob_name']
-            shuttle.data = shuttle.data['data']
-        
-        tmp_file = '{}/{}-{}'.format(shuttle.staging_path,uuid.uuid4().hex,blob_name)
-
-        save_to_file(data=shuttle.data,file_path=tmp_file)
+        blob_name = shuttle.meta['blob_name']
+        content_type = shuttle.meta['content_type']
 
         f = File(bucket=self.bucket_instance,
-                                    blob_name=blob_name)
+                blob_name=blob_name)
 
         f.write(content_type=content_type,
-                    file_path=tmp_file)
-        
-        os.remove(tmp_file)
+                    data=shuttle.data)
 
         return shuttle
 

@@ -5,6 +5,8 @@ from .converters import convert_to_string
 import json
 import csv
 
+from .converters import byte_converters
+
 __all__ = [
     "ShuttleAdapter",
 ]
@@ -97,7 +99,33 @@ def append_client_to_name(shuttle):
                 shuttle.client.__class__.__name__])
     
 
+class ExecuteClient:
 
+    @staticmethod
+    def decode_shuttle(shuttle, mime_type, params):
+        # if params:
+        shuttle.meta = params
+        from_bytes = byte_converters['from_bytes'](mime_type,shuttle.data)
+        shuttle.data = params.get('data') or from_bytes        
+        return shuttle
+
+    @staticmethod
+    def encode_shuttle(shuttle, mime_type):
+        shuttle.data = byte_converters['to_bytes'](mime_type,shuttle.data)
+        return shuttle
+
+    @staticmethod
+    def run(client, shuttle, mime_type, params):
+        #inherited from base
+        decoded_shuttle = ExecuteClient.decode_shuttle(shuttle=shuttle,
+                                              mime_type=mime_type,
+                                              params=params)
+
+        shuttle = client(decoded_shuttle)
+        
+        encoded_shuttle = ExecuteClient.encode_shuttle(shuttle=shuttle,
+                                              mime_type=mime_type)
+        return encoded_shuttle
 
 
 #TO DELETE

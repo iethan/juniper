@@ -4,19 +4,21 @@ from ..utils.adapters import ShuttleAdapter
 from ..utils.adapters import convert_to_string
 from ..utils.adapters import read_from_file
 from ..utils.adapters import save_to_file
-
 from ..utils.adapters import append_client_to_name
+
+from ..utils.converters import byte_converters
 
 
 __all__ = ["Text"]
 
 class Text(ClientABC):
 
-    def read(self,shuttle,data):
+    def read(self,shuttle):
+
+        shuttle.data = shuttle.meta.get('data')
 
         shuttle.client = self
 
-        shuttle.data = data
         shuttle.name = append_client_to_name(shuttle=shuttle)
 
         return shuttle
@@ -30,7 +32,7 @@ class Text(ClientABC):
     def delete(self,shuttle):
         raise NotImplementedError('Use a storage client to delete data')
 
-    def merge(self,shuttle,exec_func):
+    def merge(self, shuttle, data, exec_func):
         shuttle.client = self
 
         shuttle.data = exec_func(self.data)

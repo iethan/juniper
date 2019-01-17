@@ -3,7 +3,7 @@ from ..abs.client_abc import ClientABC
 from ..utils.adapters import append_client_to_name
 
 from PIL import Image
-
+import io
 try:
 
     from picamera import PiCamera
@@ -17,7 +17,7 @@ except ModuleNotFoundError:
         def start_preview(self,): pass
         def capture(self,file_name):
             img = Image.new('RGB', (640,480), color = 'red')
-            img.save(file_name)
+            img.save(file_name,'jpg')
         def close(self,): pass
 
 import time
@@ -38,17 +38,25 @@ class CameraClient(ClientABC):
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle)
 
-        tmp_file = '{}/{}.jpg'.format(shuttle.staging_path,shuttle.name.lower())
 
         camera = PiCamera()
         camera.start_preview()
         time.sleep(self.sleep) #allows picamera start
-        camera.capture(tmp_file)
+
+        if shuttle.staging_path:
+
+            tmp_file = '{}/{}.jpg'.format(shuttle.staging_path,shuttle.name.lower())
+
+            camera.capture(tmp_file)
+            shuttle.data = Image.open(tmp_file)
+            os.remove(tmp_file)
+
+        else:
+            bytes_io = io.BytesIO()
+            camera.capture(bytes_io)
+            shuttle.data = bytes_io
+
         camera.close()
-
-        shuttle.data = Image.open(tmp_file)
-
-        os.remove(tmp_file)
 
         return shuttle
 
