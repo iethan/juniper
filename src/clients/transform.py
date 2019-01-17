@@ -15,10 +15,7 @@ class Transform(ClientABC,Exception):
         
         func_result = self.exec_func(shuttle.data,**shuttle.meta)
 
-        if func_result:
-            shuttle.data = func_result
-        else:
-            raise Exception('Cannot have a None result from function')
+        shuttle.data = func_result
 
         shuttle.name = append_client_to_name(shuttle=shuttle)
 

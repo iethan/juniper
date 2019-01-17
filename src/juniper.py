@@ -6,6 +6,8 @@ import json
 
 from pprint import pprint as p
 
+from .utils.converters import byte_converters
+
 __all__ = [
     "Shuttle",
     "Juniper",
@@ -13,11 +15,27 @@ __all__ = [
 
 class Cache: pass    
 
-class Shuttle:
-    def __init__(self,name=None):
-        self._name = name
-        self._data = {}
+class Shuttle(Exception):
+
+    MIME_TYPES = ['dict', 'str', 'png',
+                  'jpg', 'list']
+
+    def __init__(self,):
+        self._name = None
+        self._data = None
         self._meta = {}
+        self._encoded_data = None
+        self._decoded_data = None
+        self._mime_type = None
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @meta.setter
+    def meta(self,value):
+        self._meta = value
+        return value   
 
     @property
     def name(self):
@@ -36,27 +54,60 @@ class Shuttle:
     def client(self,value):
         self._client = value
         return value
-    
+
     @property
-    def data(self):
-        value = self._data or io.BytesIO(
-            json.dumps({}).encode('utf-8')
-            ) 
-        return value
+    def mime_type(self,):
+        return self._mime_type or 'str'
+
+    @mime_type.setter
+    def mime_type(self,value):
+        if value not in Shuttle.MIME_TYPES:
+            raise Exception('{} not a valid mime_type'.format(value))
+        else:
+            return value
+
+    @property
+    def data(self,):
+        return self._data
 
     @data.setter
-    def data(self,value):
-        self._data = value
+    def data(self,value):  
+        self._data = value     
         return value
 
-    @property
-    def meta(self):
-        return self._meta
+    @staticmethod
+    def encode_data(data,mime_type):
+        if isinstance(data,bytes):
+            return data  
+        else: 
+            return byte_converters['to_bytes'](mime_type, data or '')
 
-    @meta.setter
-    def meta(self,value):
-        self._meta = value
-        return value       
+    @property
+    def encoded_data(self,):            
+        return Shuttle.encode_data(self.data,self.mime_type)    
+
+    @encoded_data.setter
+    def encoded_data(self, value):    
+        encoded_value = Shuttle.encode_data(value,self.mime_type)    
+        self._encoded_data = encoded_value
+        return encoded_value
+    
+    @staticmethod
+    def decode_data(data,mime_type):
+        if isinstance(data,bytes):
+            return byte_converters['from_bytes'](mime_type, data or '')
+        else: 
+            return data  
+
+    @property
+    def decoded_data(self,):
+        return Shuttle.decode_data(self.data,self.mime_type)
+
+    @decoded_data.setter
+    def decoded_data(self,value):   
+        decoded_value = Shuttle.decode_data(self.data,self.mime_type)  
+        self._decoded_data = decoded_value   
+        return decoded_value
         
 class Juniper:
 

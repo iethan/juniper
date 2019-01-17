@@ -8,7 +8,7 @@ import csv
 from .converters import byte_converters
 
 __all__ = [
-    "ShuttleAdapter",
+    "ParamAdapter",
 ]
 
 def convert_to_dict(data):
@@ -99,76 +99,28 @@ def append_client_to_name(shuttle):
                 shuttle.client.__class__.__name__])
     
 
-class ExecuteClient:
+class ParamAdapter:
 
-    @staticmethod
-    def decode_shuttle(shuttle, mime_type, params):
-        # if params:
-        shuttle.meta = params
-        from_bytes = byte_converters['from_bytes'](mime_type,shuttle.data)
-        shuttle.data = params.get('data') or from_bytes        
-        return shuttle
+    def __init__(self, shuttle, params):
+        self.params = params or {}
+        self.shuttle = shuttle
 
-    @staticmethod
-    def encode_shuttle(shuttle, mime_type):
-        shuttle.data = byte_converters['to_bytes'](mime_type,shuttle.data)
-        return shuttle
 
-    @staticmethod
-    def run(client, shuttle, mime_type, params):
-        #inherited from base
-        decoded_shuttle = ExecuteClient.decode_shuttle(shuttle=shuttle,
-                                              mime_type=mime_type,
-                                              params=params)
+    def run(self,):        
+        shuttle = self.shuttle
+        params = self.params
 
-        shuttle = client(decoded_shuttle)
+        if params:
+            shuttle.meta = params
+        if shuttle.meta.get('data'):
+            shuttle.data = shuttle.meta.get('data')
+        if shuttle.meta.get('mime_type'):
+            shuttle.mime_type = shuttle.meta.get('mime_type')
+
+        shuttle.meta.pop('data',None)
         
-        encoded_shuttle = ExecuteClient.encode_shuttle(shuttle=shuttle,
-                                              mime_type=mime_type)
-        return encoded_shuttle
+        if params:
+            shuttle.meta.pop('mime_type',None)
 
+        return shuttle        
 
-#TO DELETE
-
-class ShuttleAdapter:
-    def __init__(self,shuttle):
-        self._shuttle = shuttle
-        self._original_name = self._shuttle.name
-        self._client_name = self._shuttle.client.__class__.__name__
-
-    @property
-    def shuttle(self):
-        #append client to operator name
-        self._shuttle.name = '-'.join([self._original_name,
-                self._client_name])
-        return self._shuttle
-
-    @shuttle.setter
-    def shuttle(self,value):
-        self._shuttle = value
-        return value
-
-    def write(self):
-        try:
-            with open(self.shuttle.write_path,'+w') as f:
-                data = convert_to_string(self.shuttle.data)
-                f.write(data)
-
-        except TypeError: #implementing PIL image save
-            self.shuttle.data.save(self.shuttle.write_path)
-
-        return self.shuttle
-
-    def read(self):
-        
-        try:
-            with open(self.shuttle.write_path,'r') as f:
-                self.shuttle.data = f.read()
-
-        except UnicodeDecodeError:
-            self.shuttle.data = Image.open(self.shuttle.write_path)
-        
-        except FileNotFoundError:
-            pass
-
-        return self.shuttle

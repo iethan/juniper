@@ -1,5 +1,6 @@
 
 from ..abs.io_abc import IoABC
+from ..utils.adapters import ParamAdapter
 
 __all__ = ["Delete"]
 
@@ -14,4 +15,6 @@ class Delete(IoABC):
         return self
     
     def execute(self,shuttle):
-        return self.client.delete(shuttle,**self.kwargs)
+        shuttle = ParamAdapter(shuttle,self.params).run()
+        shuttle = self.client.merge(shuttle)     
+        return shuttle

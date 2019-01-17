@@ -407,14 +407,10 @@ class DriveClient(ClientABC):
         except:
             parent_id = None   
 
-        mime_type = params['mime_type']
-
         f = File(service=self.service, file_name=file_name, 
                     parent_id=parent_id, mime_type=content_type)
 
-        data_to_bytes = to_byte_converters[mime_type](shuttle.data)
-
-        f.write(data=data_to_bytes)
+        f.write(data=shuttle.encoded_data)
 
         return shuttle
 

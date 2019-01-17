@@ -1,11 +1,12 @@
 
 from ..abs.io_abc import IoABC
+from ..utils.adapters import ParamAdapter
 
 __all__ = ["Query"]
 
 class Query(IoABC):
-    def __init__(self,client,**kwargs):
-        self.kwargs = kwargs
+    def __init__(self,client,**params):
+        self.params = params
         self.client = client
         self.objs = [self]
 
@@ -14,4 +15,6 @@ class Query(IoABC):
         return self
     
     def execute(self,shuttle):
-        return self.client.query(shuttle,**self.kwargs)
+        shuttle = ParamAdapter(shuttle,self.params).run()
+        shuttle = self.client.query(shuttle)     
+        return shuttle

@@ -1,13 +1,12 @@
 
 from ..abs.io_abc import IoABC
-from ..utils.adapters import ExecuteClient
+from ..utils.adapters import ParamAdapter
 
 __all__ = ["Write"]
 
 class Write(IoABC):
     def __init__(self,client,**params):
         self.params = params
-        self.mime_type = params.get('mime_type','str')
         self.client = client
         self.objs = [self]
 
@@ -16,7 +15,6 @@ class Write(IoABC):
         return self
     
     def execute(self,shuttle):
-        return ExecuteClient.run(client = self.client.write,
-                                    shuttle = shuttle,
-                                    mime_type = self.mime_type, 
-                                    params = self.params)
+        shuttle = ParamAdapter(shuttle,self.params).run()
+        shuttle = self.client.write(shuttle)     
+        return shuttle

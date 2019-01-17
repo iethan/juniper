@@ -1,12 +1,6 @@
 from ..abs.client_abc import ClientABC
-from ..utils.adapters import ShuttleAdapter
 
-from ..utils.adapters import convert_to_string
-from ..utils.adapters import read_from_file
-from ..utils.adapters import save_to_file
 from ..utils.adapters import append_client_to_name
-
-from ..utils.converters import byte_converters
 
 
 __all__ = ["Text"]
@@ -14,8 +8,6 @@ __all__ = ["Text"]
 class Text(ClientABC):
 
     def read(self,shuttle):
-
-        shuttle.data = shuttle.meta.get('data')
 
         shuttle.client = self
 

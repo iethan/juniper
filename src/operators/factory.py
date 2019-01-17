@@ -20,31 +20,29 @@ class Factory(IoABC):
         options = self.kwargs.get('options')
         original_name = shuttle.name
         
-
-        try:
+        if isinstance(shuttle.data,list) and isinstance(options,list):
             
             for option,data in zip(options,shuttle.data):
-                print('aaaaaaaa')
-                print('data')
+                
                 shuttle.data = data
                 shuttle = self.operator(self.client,**option).execute(shuttle)
                 shuttle_data.append(shuttle.data)
 
-        except AttributeError as e: #data attribute is not present
-            print('bbbbbbbb')
+        elif isinstance(options,list) and not isinstance(shuttle.data,list):
+
             for option in options:
                 shuttle = self.operator(self.client,**option).execute(shuttle)
                 shuttle_data.append(shuttle.data)
 
-        except: #no options, only data given
-            print('ccccccc')
+        elif not isinstance(options,list) and isinstance(shuttle.data,list):
+
             for data in shuttle.data:
                 shuttle.data = data
                 shuttle = self.operator(self.client).execute(shuttle)
                 shuttle_data.append(shuttle.data)
         
-        print(shuttle.data)
         shuttle.data = shuttle_data
+
         shuttle.name = '-'.join([original_name,
                                 self.operator.__name__,
                                 self.client.__class__.__name__])

@@ -1,5 +1,4 @@
 from ....abs.client_abc import ClientABC
-from ....utils.adapters import ShuttleAdapter
 
 from google.cloud import storage
 
@@ -113,10 +112,9 @@ class File:
             return data.decode('utf-8')
 
     def write(self, data, content_type='txt'):
-        
-        data = convert_to_string(data)
+
         self.bucket.blob(self.blob_name)\
-            .upload_from_string(data,File.MIME_TYPES[content_type])            
+            .upload_from_string(data.read(),File.MIME_TYPES[content_type])            
         
         return self.get_blob()
 
@@ -186,7 +184,7 @@ class CloudStorageClient(ClientABC):
                 blob_name=blob_name)
 
         f.write(content_type=content_type,
-                    data=shuttle.data)
+                    data=shuttle.encoded_data)
 
         return shuttle
 

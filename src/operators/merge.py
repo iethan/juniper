@@ -1,5 +1,6 @@
 
 from ..abs.io_abc import IoABC
+from ..utils.adapters import ParamAdapter
 
 __all__ = ["Merge"]
 
@@ -14,4 +15,6 @@ class Merge(IoABC):
         return self
     
     def execute(self,shuttle):
-        return self.client.merge(shuttle,**self.kwargs)
+        shuttle = ParamAdapter(shuttle,self.params).run()
+        shuttle = self.client.merge(shuttle)     
+        return shuttle
