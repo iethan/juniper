@@ -106,21 +106,29 @@ class ParamAdapter:
         self.shuttle = shuttle
 
 
-    def run(self,):        
+    def run(self,):      
+
         shuttle = self.shuttle
         params = self.params
 
-        if params:
+        hidden_data = shuttle.meta.get('hidden_data')
+        
+        if params and not hidden_data:
             shuttle.meta = params
-        if shuttle.meta.get('data'):
-            shuttle.data = shuttle.meta.get('data')
-        if shuttle.meta.get('mime_type'):
-            shuttle.mime_type = shuttle.meta.get('mime_type')
+        
+        mime_type = shuttle.meta.get('mime_type')
+        data = shuttle.meta.get('data')  
+   
+        if data:
+            shuttle.data = data
+        if mime_type:
+            shuttle.mime_type = mime_type
 
         shuttle.meta.pop('data',None)
-        
-        if params:
+
+        if params or hidden_data:
             shuttle.meta.pop('mime_type',None)
+            shuttle.meta.pop('hidden_data',None)
 
         return shuttle        
 

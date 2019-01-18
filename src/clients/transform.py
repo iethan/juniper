@@ -12,7 +12,7 @@ class Transform(ClientABC,Exception):
     def edit(self, shuttle):
         
         shuttle.client = self
-        
+
         func_result = self.exec_func(shuttle.data,**shuttle.meta)
 
         shuttle.data = func_result
