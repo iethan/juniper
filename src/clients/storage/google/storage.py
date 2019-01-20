@@ -100,16 +100,11 @@ class File:
         self.blob = blob
         return blob
 
-    def read(self,file_path=None):
+    def read(self,):
 
-        if file_path:
-            self.bucket.blob(self.blob_name)\
-                .download_to_filename(file_path)
-            return
-        else:
-            data = self.bucket.blob(self.blob_name)\
-                .download_as_string()
-            return data.decode('utf-8')
+        data = self.bucket.blob(self.blob_name)\
+            .download_as_string()
+        return data.decode('utf-8')
 
     def write(self, data, content_type='txt'):
 
@@ -159,8 +154,6 @@ class CloudStorageClient(ClientABC):
 
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle)
-
-        tmp_file = '{}/{}-{}'.format(shuttle.staging_path, uuid.uuid4().hex,blob_name)
 
         f = File(bucket=self.bucket_instance,
                  blob_name=blob_name)

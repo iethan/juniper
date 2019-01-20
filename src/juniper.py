@@ -64,6 +64,7 @@ class Shuttle(Exception):
         if value not in Shuttle.MIME_TYPES:
             raise Exception('{} not a valid mime_type'.format(value))
         else:
+            self._mime_type = value
             return value
 
     @property
@@ -87,18 +88,16 @@ class Shuttle(Exception):
         return Shuttle.encode_data(self.data,self.mime_type)    
 
     @encoded_data.setter
-    def encoded_data(self, value):    
+    def encoded_data(self, value): 
+        print(self.mime_type)  
         encoded_value = Shuttle.encode_data(value,self.mime_type)    
         self._encoded_data = encoded_value
         return encoded_value
     
     @staticmethod
     def decode_data(data,mime_type):
-        if isinstance(data,bytes):
-            return byte_converters['from_bytes'](mime_type, data or '')
-        else: 
-            return data  
-
+        return byte_converters['from_bytes'](mime_type, data or '')
+        
     @property
     def decoded_data(self,):
         return Shuttle.decode_data(self.data,self.mime_type)

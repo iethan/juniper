@@ -105,15 +105,20 @@ class ParamAdapter:
         self.params = params or {}
         self.shuttle = shuttle
 
-
     def run(self,):      
 
         shuttle = self.shuttle
         params = self.params
 
-        hidden_data = shuttle.meta.get('hidden_data')
-        
-        if params and not hidden_data:
+        drop_params = self.params.get('drop_params')
+        if isinstance(drop_params,list):
+            shuttle.meta = {k:v for k,v in params.items() \
+                        if not k in drop_params}
+
+        elif drop_params == 'all':
+            shuttle.meta = {}
+
+        elif params:
             shuttle.meta = params
         
         mime_type = shuttle.meta.get('mime_type')
@@ -126,9 +131,9 @@ class ParamAdapter:
 
         shuttle.meta.pop('data',None)
 
-        if params or hidden_data:
+        if params:
             shuttle.meta.pop('mime_type',None)
-            shuttle.meta.pop('hidden_data',None)
+            shuttle.meta.pop('drop_params',None)
 
         return shuttle        
 

@@ -16,5 +16,5 @@ class Write(IoABC):
     
     def execute(self,shuttle):
         shuttle = ParamAdapter(shuttle,self.params).run()
-        shuttle = self.client.write(shuttle)     
+        shuttle = self.client.write(shuttle)
         return shuttle

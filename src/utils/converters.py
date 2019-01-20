@@ -9,32 +9,16 @@ def convert_to_string(data):
         return str(data)
 
 def bytes_to_dict(bytes_io):
-    data = bytes_io.read()
-    return json.loads(data.decode('utf-8'))
+    return json.loads(bytes_io.read().decode('utf-8'))
 
 def bytes_to_str(bytes_io):
-    data = bytes_io.read()
-    try:
-        return json.loads(data.decode('utf-8'))
-    except:
-        return data.decode('utf-8')
+    return bytes_io.read().decode('utf-8')
 
-def str_to_bytes(str_data):
-    bytes_io = io.BytesIO()
-    try:
-        str_data = json.dumps(str_data)
-    except:
-        pass
-    bytes_io.write(str_data.encode('utf-8'))
-    bytes_io.seek(0)
-    return bytes_io
+def str_to_bytes(str_data):    
+    return io.BytesIO(str_data.encode('utf-8'))
 
 def dict_to_bytes(dict_data):
-    bytes_io = io.BytesIO()
-    dict_to_str = json.dumps(dict_data)
-    bytes_io.write(dict_to_str.encode('utf-8'))
-    bytes_io.seek(0)
-    return bytes_io
+    return io.BytesIO(json.dumps(dict_data).encode('utf-8'))
 
 def img_to_bytes(img_data,mime_type):
     bytes_io = io.BytesIO()
