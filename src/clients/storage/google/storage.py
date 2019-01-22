@@ -9,6 +9,7 @@ from ....utils.adapters import read_from_file
 
 from ....utils.converters import byte_converters
 
+import io
 import uuid 
 import json
 import os
@@ -104,7 +105,8 @@ class File:
 
         data = self.bucket.blob(self.blob_name)\
             .download_as_string()
-        return data.decode('utf-8')
+        
+        return io.BytesIO(data)
 
     def write(self, data, content_type='txt'):
 
@@ -150,18 +152,17 @@ class CloudStorageClient(ClientABC):
     def bucket_instance(self,):
         return self.bucket.bucket_instance
 
-    def read(self,shuttle,blob_name,content_type='txt'):
+    def read(self,shuttle):
 
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle)
 
+        blob_name = shuttle.meta['blob_name']
+
         f = File(bucket=self.bucket_instance,
                  blob_name=blob_name)
 
-        f.read(file_path=tmp_file) #saves file to staging
-        shuttle.data = read_from_file(tmp_file) #stores on shuttle
-
-        os.remove(tmp_file) #removes from staging
+        shuttle.encoded_data = f.read()
         
         return shuttle
 
@@ -199,16 +200,11 @@ class CloudStorageClient(ClientABC):
         shuttle.client = self
         shuttle.name = append_client_to_name(shuttle=shuttle)
 
-        tmp_file = '{}/{}-{}'.format(shuttle.staging_path,uuid.uuid4().hex,blob_name)
-
         blobs = self.bucket_instance.list_blobs(prefix=prefix)
         self.bucket_instance.blob(blob_name).compose(blobs)
 
         f = File(bucket=self.bucket_instance,blob_name=blob_name)
 
-        f.read(file_path=tmp_file) #saves file to staging
-        shuttle.data = read_from_file(tmp_file) #stores on shuttle
-
-        os.remove(tmp_file) #removes from staging        
+        shuttle.encoded_data = f.read()
 
         return shuttle

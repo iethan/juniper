@@ -15,6 +15,6 @@ class Edit(IoABC):
         return self    
 
     def execute(self,shuttle):
-        shuttle = ParamAdapter(shuttle,self.params).run()
+        shuttle = ParamAdapter(shuttle,self.params,self.client).run()
         shuttle = self.client.edit(shuttle)     
         return shuttle

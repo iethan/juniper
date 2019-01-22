@@ -101,14 +101,18 @@ def append_client_to_name(shuttle):
 
 class ParamAdapter:
 
-    def __init__(self, shuttle, params):
+    def __init__(self, shuttle, params, client=None):
         self.params = params or {}
         self.shuttle = shuttle
+        self.client = client
 
     def run(self,):      
 
         shuttle = self.shuttle
         params = self.params
+        client = self.client
+        
+        shuttle.client = client
 
         drop_params = self.params.get('drop_params')
         if isinstance(drop_params,list):

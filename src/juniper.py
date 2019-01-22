@@ -23,10 +23,17 @@ class Shuttle(Exception):
     def __init__(self,):
         self._name = None
         self._data = None
+        self._client = None
         self._meta = {}
         self._encoded_data = None
         self._decoded_data = None
         self._mime_type = None
+
+    def __repr__(self,):
+        return '{}: {}'.format(self.__class__,self.__dict__)
+
+    def __str__(self):
+        return 'Shuttle(name={},meta={},client={})'.format(self.name,self.meta,self.client)
 
     @property
     def meta(self):
@@ -78,7 +85,7 @@ class Shuttle(Exception):
 
     @staticmethod
     def encode_data(data,mime_type):
-        if isinstance(data,bytes):
+        if isinstance(data,io.BytesIO):
             return data  
         else: 
             return byte_converters['to_bytes'](mime_type, data or '')
@@ -88,8 +95,7 @@ class Shuttle(Exception):
         return Shuttle.encode_data(self.data,self.mime_type)    
 
     @encoded_data.setter
-    def encoded_data(self, value): 
-        print(self.mime_type)  
+    def encoded_data(self, value):  
         encoded_value = Shuttle.encode_data(value,self.mime_type)    
         self._encoded_data = encoded_value
         return encoded_value
